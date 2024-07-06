@@ -1,0 +1,21 @@
+.header{
+    background-color: rgb(240, 163, 163);
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+}
+
+.ul-list{
+    display: flex;
+    flex-direction: row;
+    list-style: none;
+    /* padding: 0 30px */
+}
+
+.ul-list li{
+    margin: 0 15px;
+}
+
+.header-logo{
+    padding-left: 5px;
+}
