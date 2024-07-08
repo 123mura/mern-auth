@@ -1,12 +1,15 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/userContext";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setUser } = useContext(UserContext);
   const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
@@ -26,10 +29,16 @@ const Login = () => {
 
       if (response.status === 200) {
         toast.success("Logged in successfully");
-        console.log(response.data);
-        navigate("/");
-        setEmail("");
-        setPassword("");
+        console.log("Login response:", response.data); // Debugging log
+        if (response.data.validUser) {
+          setUser(response.data.validUser); // Update user context
+          console.log("User set in context:", response.data.validUser); // Debugging log
+          navigate("/");
+          setEmail("");
+          setPassword("");
+        } else {
+          console.error("User data not found in response");
+        }
       }
     } catch (err) {
       console.log("Error while signing in", err);

@@ -27,12 +27,11 @@ mongoose
   });
 
 app.post("/login", async (req, res) => {
-  // logic to get the details from the frontend and verfing
   const { email, password } = req.body;
   try {
     const validUser = await User.findOne({ email });
     if (!validUser) {
-      res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "User not found" });
     }
     const isValidPassword = await bcrypt.compare(password, validUser.password);
     if (!isValidPassword) {
@@ -46,15 +45,24 @@ app.post("/login", async (req, res) => {
       },
       "secretkey"
     );
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "Lax",
-      secure: false,
-    });
-    res.status(200).json({ message: "Logged in successfully" });
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   sameSite: "Lax",
+    //   secure: false,
+    // });
+    // res
+    //   .status(200)
+    //   .json({ message: "Logged in successfully", user: validUser });
+    res
+      .cookie("token", token, {
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: false,
+      })
+      .json({ validUser });
   } catch (err) {
-    console.log("error during login", err);
-    res.status(500).json({ message: "error occured while logging in" });
+    console.log("Error during login", err);
+    res.status(500).json({ message: "Error occurred while logging in" });
   }
 });
 
@@ -95,6 +103,20 @@ app.post("/signup", async (req, res) => {
   } catch (err) {
     console.error("Error during signup", err);
     res.status(500).json({ message: "An error occured during signup" });
+  }
+});
+
+app.get("/api/user", async (req, res) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized " });
+  }
+  try {
+    const decoded = jwt.verify(token, "secretkey");
+    const result = await User.findOne({ email: decoded.email });
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(401).json({ error: "unauthorized" });
   }
 });
 
