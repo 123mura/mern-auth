@@ -1,16 +1,40 @@
-// LoginForm.jsx
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-
-const Login= () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSubmit = (e) => {
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Add your login logic here
-    console.log('Email:', email);
-    console.log('Password:', password);
+    if (!email || !password) {
+      alert("Please fill out the details");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/login",
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        toast.success("Logged in successfully");
+        console.log(response.data);
+        navigate("/");
+        setEmail("");
+        setPassword("");
+      }
+    } catch (err) {
+      console.log("Error while signing in", err);
+      toast.error(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
@@ -39,8 +63,9 @@ const Login= () => {
         </div>
         <button type="submit">Login</button>
       </form>
-      <p>Don't have an account <Link to="/signup">
-      SignUp</Link></p>
+      <p>
+        Don't have an account? <Link to="/signup">Sign Up</Link>
+      </p>
     </div>
   );
 };
